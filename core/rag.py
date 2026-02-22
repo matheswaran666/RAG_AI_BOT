@@ -9,9 +9,10 @@ from chromadb.config import Settings
 class rag:
     def __init__(self):
         self.embed_model = SentenceTransformer("all-MiniLM-L6-v2")
-        persist_dir = os.path.abspath("chroma_storage")
-        self.client = chromadb.PersistentClient(
-           path=persist_dir
+        self.client = chromadb.CloudClient(
+        api_key=os.getenv("CHROMA_API_KEY"),
+        tenant=os.getenv("CHROMA_TENANT"),
+        database=os.getenv("CHROMA_DATABASE")
         )
 
     

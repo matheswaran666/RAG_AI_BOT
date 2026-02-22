@@ -1,7 +1,11 @@
 from core.llm_utils import llm
 from core.utils import Utils
 
+def get_llm_instance():
+    return llm()
 
-llm_instance = llm()
-utils_instance = Utils()
-rag_instance = llm_instance.rag
+def get_utils_instance():
+    return Utils()
+
+def get_rag_instance():
+    return rag()

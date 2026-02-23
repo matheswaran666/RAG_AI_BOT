@@ -3,27 +3,26 @@ from openai import OpenAI
 import os
 import uuid
 from chromadb.config import Settings
-
-
+import requests
+from sentence_transformers import SentenceTransformer
 class rag:
     def __init__(self):
-        self.embed_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY1"))
-        self.embed_model = "text-embedding-3-small"
+        self.embed_model = SentenceTransformer("all-MiniLM-L6-v2")       
         self.client = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),
         tenant=os.getenv("CHROMA_TENANT"),
         database=os.getenv("CHROMA_DATABASE")
         )
 
+        # self.api_key = os.getenv("QUBRID_API_KEY")
+        # self.url = "https://api.qubrid.ai/v1/embeddings"
+
+
+
     def embed_texts(self, texts):
             if isinstance(texts, str):
                  texts = [texts]
-            response = self.embed_client.embeddings.create(
-                model=self.embed_model,
-                input=texts
-            )
-
-            return [item.embedding for item in response.data]
+            return self.embed_model.encode(texts).tolist()        
         
     def create_collections(self,collection_name,docs):
         collection = self.get_or_create_collection(collection_name)

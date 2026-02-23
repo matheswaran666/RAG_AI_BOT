@@ -15,18 +15,10 @@ class llm:
     def __init__(self):
         print("model loading...")
         print("LLM INIT — PID:", os.getpid())
-
         self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY1"))
         self.rag = rag()
         self.model = "gemini-2.5-flash"     
-        self.asr = pipeline(
-            "automatic-speech-recognition",
-            model="openai/whisper-small",
-            generate_kwargs={
-                "task": "transcribe",
-                "language": "en"
-            }
-        )
+        self.asr = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
                
 
@@ -77,18 +69,18 @@ class llm:
             ]
 
         response = self.generate_response(contents)
-        self.rag.add_doc_to_collection(collection_name,response)
+        return self.rag.add_doc_to_collection(collection_name,response)
+
 
     def add_doc_to_collection(self,collection_name,docs,metadata=None):
         self.rag.add_doc_to_collection(collection_name,docs,metadata)
 
-    def audio_to_text(self, file_path):
-        print(file_path)
-        result = self.asr(file_path)
-        print(result["text"])   
-        return result["text"]
-    
-   
+    def audio_to_text(self, file):
+        result = self.asraudio.audio.transcriptions.create(
+            model="whisper-1",
+            file=file.file,
+        )
+        return result.text  
 
     def ask_llm(self, prompt, collection_name):
 

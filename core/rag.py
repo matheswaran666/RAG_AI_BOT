@@ -8,30 +8,39 @@ from chromadb.config import Settings
 
 class rag:
     def __init__(self):
-        self.embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.embed_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.embed_model = "text-embedding-3-small"
         self.client = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),
         tenant=os.getenv("CHROMA_TENANT"),
         database=os.getenv("CHROMA_DATABASE")
         )
 
-    
+    def embed_texts(self, texts):
+            response = self.embed_client.embeddings.create(
+                model=self.embed_model,
+                input=texts
+            )
+
+            return [item.embedding for item in response.data]
+        
     def create_collections(self,collection_name,docs):
         collection = self.get_or_create_collection(collection_name)
-        embeddings = self.embed_model.encode(docs).tolist()
         collection.add(
         documents=docs,
-        embeddings=embeddings,
+        embeddings=self.embed_texts(docs),
         ids=[str(uuid.uuid4()) for _ in range(len(docs))]
         )
+        return "collection created succesfully"
+
+    
     
     def add_doc_to_collection(self,collection_name,docs,metadata=None):
         print("add_doc_to_collection_")
         collection = self.get_or_create_collection(collection_name)
-        embedding = self.embed_model.encode(docs).tolist()
         collection.add(
             documents=docs,
-            embeddings=embedding,
+            embeddings=self.embed_texts(docs),
             ids = str(uuid.uuid4()),
             metadatas=metadata if metadata else None
         )

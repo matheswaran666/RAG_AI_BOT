@@ -2,12 +2,9 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from .rag import rag
-from transformers import pipeline
 from google import genai
-import torch
 import io
 
-torch.set_num_threads(8)
 load_dotenv()
 
 

@@ -1,38 +1,51 @@
 import chromadb
-from openai import OpenAI
+from google import genai
 import os
 import uuid
 from chromadb.config import Settings
 import requests
-from sentence_transformers import SentenceTransformer
+from uuid import uuid4
+
 class rag:
     def __init__(self):
-        self.embed_model = SentenceTransformer("all-MiniLM-L6-v2")       
+        self.model = genai.Client(api_key=os.getenv("GEMINI_API_KEY2"))      
         self.client = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),
         tenant=os.getenv("CHROMA_TENANT"),
         database=os.getenv("CHROMA_DATABASE")
         )
 
-        # self.api_key = os.getenv("QUBRID_API_KEY")
-        # self.url = "https://api.qubrid.ai/v1/embeddings"
-
-
-
     def embed_texts(self, texts):
-            if isinstance(texts, str):
-                 texts = [texts]
-            return self.embed_model.encode(texts).tolist()        
-        
-    def create_collections(self,collection_name,docs):
-        collection = self.get_or_create_collection(collection_name)
-        collection.add(
-        documents=docs,
-        embeddings=self.embed_texts(docs),
-        ids=[str(uuid.uuid4()) for _ in range(len(docs))]
-        )
-        return "collection created succesfully"
+        if isinstance(texts, str):
+            texts = [texts]
 
+        response = self.model.models.embed_content(
+            model="models/gemini-embedding-001",
+            contents=texts
+        )
+
+
+        return [e.values for e in response.embeddings]     
+        
+
+    def create_collections(self, collection_name, docs):
+
+            if isinstance(docs, str):
+                docs = [docs]
+
+            collection = self.get_or_create_collection(collection_name)
+
+            embeddings = self.embed_texts(docs)
+
+            ids = [str(uuid4()) for _ in docs]
+
+            collection.add(
+                documents=docs,
+                embeddings=embeddings,
+                ids=ids
+            )
+
+            return "collection created successfully"
     
     
     def delete_doc_from_collection(self,collection_name,docId):

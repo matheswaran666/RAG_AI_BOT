@@ -1,13 +1,9 @@
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
 from .rag import rag
 from google import genai
 import io
 import requests
-from transformers import pipeline
-import torch
-
 load_dotenv()
 
 
@@ -16,17 +12,20 @@ class llm:
         print("model loading...")
         print("LLM INIT — PID:", os.getpid())
 
-        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY1"))
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY2"))
+        for model in self.client.models.list():
+            print(model.name)
+
         self.rag = rag()
         self.model = "gemini-2.5-flash"     
-        self.asr = pipeline(
-            "automatic-speech-recognition",
-            model="openai/whisper-small",
-            generate_kwargs={
-                "task": "transcribe",
-                "language": "en"
-            }
-        )
+        # self.asr = pipeline(
+        #     "automatic-speech-recognition",
+        #     model="openai/whisper-small",
+        #     generate_kwargs={
+        #         "task": "transcribe",
+        #         "language": "en"
+        #     }
+        # )
 
     def create_rag_collection(self,collection_name,docs):
         contents = [
@@ -75,18 +74,27 @@ class llm:
             ]
 
         response = self.generate_response(contents)
-        return self.rag.add_doc_to_collection(collection_name,response)
+        return self.rag.create_collections(collection_name,response)
 
 
     def add_doc_to_collection(self,collection_name,docs,metadata=None):
         self.rag.add_doc_to_collection(collection_name,docs,metadata)
 
     
-    def audio_to_text(self, file_path):
-        print(file_path)
-        result = self.asr(file_path)
-        print(result["text"])   
-        return result["text"]
+    def audio_to_text(self, audio_bytes):
+            response = self.client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=[
+                {
+                    "role": "user",
+                    "parts": [
+                        {"mime_type": "audio/wav", "data": audio_bytes},
+                        {"text": "Transcribe this audio."}
+                    ]
+                }
+            ]
+            )
+            return response.text
 
         
 
@@ -98,6 +106,15 @@ class llm:
             prompt = f""" 
                 {prompt} 
                 context : {retrieved_text}
+                instruction : 
+                    Return only a valid JSON object.The first character of your response must be "{".The last character of your response must be "}". you include anything else, the response is invalid 
+
+                        Do not wrap it in markdown.
+                        Do not include ``` or ```json.
+                        Do not include explanations.
+                        Do not include any text before or after the JSON.
+
+
                             """
 
             return self.generate_response(prompt)

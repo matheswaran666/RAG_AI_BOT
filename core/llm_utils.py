@@ -15,7 +15,7 @@ class llm:
         self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY1"))
         self.rag = rag()
         self.model = "gemini-2.5-flash"     
-        self.asr = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.asr = OpenAI(api_key=os.getenv("OPENAI_API_KEY1"))
 
                
 

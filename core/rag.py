@@ -7,7 +7,7 @@ from chromadb.config import Settings
 
 class rag:
     def __init__(self):
-        self.embed_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.embed_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY1"))
         self.embed_model = "text-embedding-3-small"
         self.client = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),

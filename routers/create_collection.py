@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException, Request
 
-router = APIRouter(prefix="/create_collection")
+router = APIRouter()
 
 def get_llm(app):
     if not hasattr(app.state, "llm"):

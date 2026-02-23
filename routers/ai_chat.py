@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
-router = APIRouter(prefix="/ai_chat")
+router = APIRouter()
 
 def get_llm(app):
     if not hasattr(app.state, "llm"):

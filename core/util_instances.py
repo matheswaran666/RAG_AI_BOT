@@ -7,5 +7,3 @@ def get_llm_instance():
 def get_utils_instance():
     return Utils()
 
-def get_rag_instance():
-    return rag()

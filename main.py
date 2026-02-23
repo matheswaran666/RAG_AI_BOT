@@ -1,21 +1,12 @@
 from fastapi import FastAPI
-from routers import ai_chat,create_collection
+from routers import ai_chat, create_collection, ai_audio_chat
 import os
-
 
 app = FastAPI()
 
-app.include_router(ai_chat.router,prefix="/ai_chat")
-app.include_router(create_collection.router,prefix="/create_collection")
-
-
-@app.on_event("startup")
-async def startup_event():
-    from core.util_instances import get_llm_instance, get_utils_instance
-
-    app.state.llm = get_llm_instance()
-    app.state.utils = get_utils_instance()
-    app.state.rag = app.state.llm.rag
+app.include_router(ai_chat.router, prefix="/ai_chat")
+app.include_router(ai_audio_chat.router, prefix="/ai_chat")
+app.include_router(create_collection.router, prefix="/create_collection")
 
 
 if __name__ == "__main__":

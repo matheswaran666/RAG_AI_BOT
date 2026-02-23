@@ -1,5 +1,4 @@
 import chromadb
-from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 import os
 import uuid
@@ -17,6 +16,8 @@ class rag:
         )
 
     def embed_texts(self, texts):
+            if isinstance(texts, str):
+                 texts = [texts]
             response = self.embed_client.embeddings.create(
                 model=self.embed_model,
                 input=texts
@@ -35,16 +36,6 @@ class rag:
 
     
     
-    def add_doc_to_collection(self,collection_name,docs,metadata=None):
-        print("add_doc_to_collection_")
-        collection = self.get_or_create_collection(collection_name)
-        collection.add(
-            documents=docs,
-            embeddings=self.embed_texts(docs),
-            ids = str(uuid.uuid4()),
-            metadatas=metadata if metadata else None
-        )
-    
     def delete_doc_from_collection(self,collection_name,docId):
         collection = self.client.get_collection(collection_name)
 
@@ -55,7 +46,7 @@ class rag:
             return self.client.create_collection(collection_name)
 
     def search_docs(self,query,collection_name):
-        query = self.embed_model.encode([query]).tolist()
+        query = self.embed_texts([query])
         results = self.client.get_collection(collection_name).query(
             query_embeddings=query, 
             n_results=2

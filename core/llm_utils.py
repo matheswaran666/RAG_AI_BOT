@@ -5,6 +5,8 @@ from google import genai
 import io
 import requests
 load_dotenv()
+import json
+
 
 
 class llm:
@@ -12,10 +14,7 @@ class llm:
         print("model loading...")
         print("LLM INIT — PID:", os.getpid())
 
-        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY2"))
-        for model in self.client.models.list():
-            print(model.name)
-
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY3"))
         self.rag = rag()
         self.model = "gemini-2.5-flash"     
         # self.asr = pipeline(
@@ -123,9 +122,13 @@ class llm:
         response_obj = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
+             config={
+                "response_mime_type": "application/json"
+            }
         )
         response = response_obj.text
-        return response
+        return json.loads(response)
+
     
     def collection_exists(self,collection_name):
         return self.rag.collection_exists(collection_name)

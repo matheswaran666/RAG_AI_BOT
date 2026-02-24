@@ -127,7 +127,7 @@ class llm:
             }
         )
         response = response_obj.text
-        return json.loads(response)
+        return response
 
     
     def collection_exists(self,collection_name):

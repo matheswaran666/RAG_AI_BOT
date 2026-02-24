@@ -8,8 +8,8 @@ from uuid import uuid4
 
 class rag:
     def __init__(self):
-        self.model = genai.Client(api_key=os.getenv("GEMINI_API_KEY2"))      
-        self.client = chromadb.CloudClient(
+        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY2"))      
+        self.vectorDB = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),
         tenant=os.getenv("CHROMA_TENANT"),
         database=os.getenv("CHROMA_DATABASE")
@@ -19,7 +19,7 @@ class rag:
         if isinstance(texts, str):
             texts = [texts]
 
-        response = self.model.models.embed_content(
+        response = self.client.models.embed_content(
             model="models/gemini-embedding-001",
             contents=texts
         )
@@ -49,17 +49,17 @@ class rag:
     
     
     def delete_doc_from_collection(self,collection_name,docId):
-        collection = self.client.get_collection(collection_name)
+        collection = self.vectorDB.get_collection(collection_name)
 
     def get_or_create_collection(self, collection_name):
         try:
-            return self.client.get_collection(collection_name)
+            return self.vectorDB.get_collection(collection_name)
         except:
-            return self.client.create_collection(collection_name)
+            return self.vectorDB.create_collection(collection_name)
 
     def search_docs(self,query,collection_name):
         query = self.embed_texts([query])
-        results = self.client.get_collection(collection_name).query(
+        results = self.vectorDB.get_collection(collection_name).query(
             query_embeddings=query, 
             n_results=2
         )
@@ -68,7 +68,7 @@ class rag:
     
     def collection_exists(self,collection_name):
         try:
-            self.client.get_collection(collection_name)
+            self.vectorDB.get_collection(collection_name)
             return True
         except:
             return False

@@ -16,7 +16,7 @@ class llm:
 
         self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY4"))
         self.rag = rag()
-        self.model = "gemini-3-flash-preview"     
+        self.model = "gemini-2.5-flash"     
         # self.asr = pipeline(
         #     "automatic-speech-recognition",
         #     model="openai/whisper-small",

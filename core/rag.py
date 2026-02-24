@@ -8,7 +8,7 @@ from uuid import uuid4
 
 class rag:
     def __init__(self):
-        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY2"))      
+        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY4"))      
         self.vectorDB = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),
         tenant=os.getenv("CHROMA_TENANT"),

@@ -14,7 +14,7 @@ class llm:
         print("model loading...")
         print("LLM INIT — PID:", os.getpid())
 
-        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY3"))
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY4"))
         self.rag = rag()
         self.model = "gemini-2.5-flash"     
         # self.asr = pipeline(

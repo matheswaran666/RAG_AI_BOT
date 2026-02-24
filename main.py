@@ -1,6 +1,16 @@
 from fastapi import FastAPI
 from routers import ai_chat, create_collection, ai_audio_chat
 import os
+from fastapi.middleware.cors import CORSMiddleware
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app = FastAPI()
 

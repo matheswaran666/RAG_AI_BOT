@@ -4,6 +4,8 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 
 
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -12,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app = FastAPI()
 
 app.include_router(ai_chat.router, prefix="/ai_chat")
 app.include_router(ai_audio_chat.router, prefix="/ai_chat")

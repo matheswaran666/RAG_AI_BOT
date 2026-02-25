@@ -102,7 +102,7 @@ class llm:
             )
             return response.text
 
-    def change_api_key():
+    def change_api_key(self):
         self.api_key_num += 1
         if self.api_key_num > 10:
             self.api_key_num = 1

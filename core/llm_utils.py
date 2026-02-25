@@ -6,6 +6,8 @@ import io
 import requests
 load_dotenv()
 import json
+from openai import OpenAI
+
 
 
 
@@ -16,7 +18,11 @@ class llm:
 
         self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY4"))
         self.rag = rag()
-        self.model = "gemini-2.5-flash"     
+        self.model = "gemini-2.5-flash"   
+        self.api_key_num = 1
+
+
+       
         # self.asr = pipeline(
         #     "automatic-speech-recognition",
         #     model="openai/whisper-small",
@@ -25,6 +31,8 @@ class llm:
         #         "language": "en"
         #     }
         # )
+
+
 
     def create_rag_collection(self,collection_name,docs):
         contents = [
@@ -95,7 +103,13 @@ class llm:
             )
             return response.text
 
-        
+    def change_api_key():
+        self.api_key_num += 1
+        if self.api_key_num > 10:
+            self.api_key_num = 1
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"+str(self.api_key_num)))
+
+
 
     def ask_llm(self, prompt, collection_name):
 
@@ -119,18 +133,20 @@ class llm:
             return self.generate_response(prompt)
         
     def generate_response(self,prompt):
-        response_obj = self.client.models.generate_content(
+        try:
+            response_obj = self.client.models.generate_content(
             model=self.model,
             contents=prompt,
              config={
                 "response_mime_type": "application/json"
             }
         )
+        except:
+            self.change_api_key()
+            return self.generate_response(prompt)
         response = response_obj.text
         return response
-
     
     def collection_exists(self,collection_name):
         return self.rag.collection_exists(collection_name)
     
-

@@ -8,12 +8,18 @@ from uuid import uuid4
 
 class rag:
     def __init__(self):
-        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY4"))      
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY4"))      
         self.vectorDB = chromadb.CloudClient(
         api_key=os.getenv("CHROMA_API_KEY"),
         tenant=os.getenv("CHROMA_TENANT"),
         database=os.getenv("CHROMA_DATABASE")
         )
+        self.api_key_num = 4
+
+    def change_api_key(self):
+        self.api_key_num += 1
+        self.client = genai.Client(api_key="GOOGLE_API_KEY"+str(self.api_key_num))
+
 
     def embed_texts(self, texts):
         if isinstance(texts, str):
@@ -56,6 +62,7 @@ class rag:
             return self.vectorDB.get_collection(collection_name)
         except:
             return self.vectorDB.create_collection(collection_name)
+
 
     def search_docs(self,query,collection_name):
         query = self.embed_texts([query])

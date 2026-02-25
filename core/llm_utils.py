@@ -6,7 +6,6 @@ import io
 import requests
 load_dotenv()
 import json
-from openai import OpenAI
 
 
 

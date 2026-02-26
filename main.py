@@ -1,8 +1,13 @@
 from fastapi import FastAPI
-from routers import ai_chat, create_collection, ai_audio_chat
+from routers import ai_chat, collection, ai_audio_chat
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
 
 app = FastAPI()
 
@@ -17,7 +22,7 @@ app.add_middleware(
 
 app.include_router(ai_chat.router, prefix="/ai_chat")
 app.include_router(ai_audio_chat.router, prefix="/ai_chat")
-app.include_router(create_collection.router, prefix="/create_collection")
+app.include_router(collection.router, prefix="/collection")
 
 
 if __name__ == "__main__":

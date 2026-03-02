@@ -124,7 +124,7 @@ Document:
 
     
     def generate_response(self, prompt):
-        logger.info("Calls count", self.request_count)
+        logger.info("Calls count"+str(self.request_count))
         self.request_count += 1
         # Prevent hitting the 15 RPM limit on free tier
         if self.request_count % 10 == 0:

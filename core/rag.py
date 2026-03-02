@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class rag:
     def __init__(self):
         logger.info("Initializing RAG system...")
-        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY4"))
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY1"))
 
         self.vectorDB = chromadb.CloudClient(
             api_key=os.getenv("CHROMA_API_KEY"),
@@ -18,11 +18,11 @@ class rag:
             database=os.getenv("CHROMA_DATABASE")
         )
 
-        self.api_key_num = 4
+        self.api_key_num = 1
 
     def change_api_key(self):
         self.api_key_num += 1
-        if self.api_key_num > 14:
+        if self.api_key_num > 16:
             self.api_key_num = 1
 
         logger.warning(f"Switching embedding API key to #{self.api_key_num}")
@@ -45,7 +45,7 @@ class rag:
             return [e.values for e in response.embeddings]
 
         except Exception:
-            logger.exception("Embedding failed. Rotating API key.")
+            logger.exception("Embedding failed. changing API key.")
             self.change_api_key()
             return self.embed_texts(texts)
 

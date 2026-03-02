@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class ChatRequest(BaseModel):
     prompt: str
     api_key: str = Field(alias="x-api-key")
-
+    
 
 @router.post("/ask")
 def ask(request: Request, body: ChatRequest, llm=Depends(get_llm)):

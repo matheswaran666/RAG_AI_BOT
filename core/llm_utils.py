@@ -1,8 +1,11 @@
 import os
+import json
 from dotenv import load_dotenv
 from .rag import rag
 from google import genai
+from google.genai import errors
 import logging
+import time
 
 load_dotenv()
 
@@ -16,8 +19,12 @@ class llm:
 
         self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY1"))
         self.rag = rag()
-        self.model = "gemini-2.5-flash"
+        self.model = os.getenv("MODEL1")
+        self.model_num = 1
         self.api_key_num = 1
+        self.request_count = 0
+        self.available_api_keys_count = 16
+        self.available_models_keys_count = 4
 
     def create_rag_collection(self, collection_name, docs):
         logger.info(f"Creating RAG collection: {collection_name}")
@@ -91,19 +98,70 @@ Document:
             ]
         )
         logger.debug("Audio transcription completed.")
+
         return response.text
 
     def change_api_key(self):
         self.api_key_num += 1
-        if self.api_key_num > 14:
+        if self.api_key_num > self.available_api_keys_count:
             self.api_key_num = 1
-
+        if self.api_key_num == self.available_api_keys_count - 5 and self.model_num == 1:
+            self.switch_model()
         logger.warning(f"Switching to API key #{self.api_key_num}")
 
         self.client = genai.Client(
             api_key=os.getenv("GOOGLE_API_KEY" + str(self.api_key_num))
         )
+    
+    def switch_model(self):
+        logger.info("Switching model...")
+        self.model_num += 1
+        if self.model_num > self.available_models_keys_count:
+            self.model_num = 1
 
+        self.model = os.getenv("MODEL" + str(self.model_num))
+        logger.debug(f"Model switched to: {self.model}")
+    
+
+    def generate_response(self, prompt):
+        
+        self.request_count += 1
+        # Prevent hitting the 15 RPM limit on free tier
+        if self.request_count % 10 == 0:
+            logger.info("Cooling down for 60s...")
+            time.sleep(60)
+        
+        try:
+            logger.debug(f"Generating response using {self.model}...")
+            
+            response_obj = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config={
+                    "response_mime_type": "application/json"
+                }
+            )
+            
+            logger.debug("LLM response received successfully.")
+            print(f"Model: {self.model} | Key Index: {self.api_key_num}")
+            return response_obj.text
+
+        except errors.ServerError:
+            # Server-side overload (503)
+            logger.warning("Model unavailable (503). Switching model...")
+            self.switch_model()
+            return self.generate_response(prompt)
+
+        except errors.ClientError:
+            # Rate limit or quota hit (429)
+            logger.warning("Quota exceeded (429). Switching API key...")
+            self.change_api_key()
+            return self.generate_response(prompt)
+
+        except Exception as e:
+            logger.exception(f"Unexpected error occurred: {type(e)} - {e}")
+            raise
+    
     def ask_llm(self, prompt, collection_name):
         logger.info(f"LLM request for collection: {collection_name}")
         logger.debug(f"Prompt: {prompt}")
@@ -115,36 +173,18 @@ Document:
             return "I don't have enough information in the collection."
 
         prompt = f"""
-{prompt}
-context : {retrieved_text}
-instruction :
-Return only a valid JSON object.The first character of your response must be "{{".The last character of your response must be "}}". you include anything else, the response is invalid
+            {prompt}
+            context : {retrieved_text}
+            instruction :
+            Return only a valid JSON object.The first character of your response must be "{{".The last character of your response must be "}}". you include anything else, the response is invalid
 
-Do not wrap it in markdown.
-Do not include ``` or ```json.
-Do not include explanations.
-Do not include any text before or after the JSON.
-"""
-
+            Do not wrap it in markdown.
+            Do not include ``` or ```json.
+            Do not include explanations.
+            Do not include any text before or after the JSON.
+            """
         return self.generate_response(prompt)
 
-    def generate_response(self, prompt):
-        try:
-            logger.debug("Generating response from LLM...")
-            response_obj = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config={
-                    "response_mime_type": "application/json"
-                }
-            )
-            logger.debug("LLM response received successfully.")
-            return response_obj.text
-
-        except Exception as e:
-            logger.exception("Error generating response. Switching API key.")
-            self.change_api_key()
-            return self.generate_response(prompt)
 
     def collection_exists(self, collection_name):
         logger.debug(f"Checking if collection exists: {collection_name}")

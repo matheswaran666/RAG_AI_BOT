@@ -121,10 +121,10 @@ Document:
 
         self.model = os.getenv("MODEL" + str(self.model_num))
         logger.debug(f"Model switched to: {self.model}")
-    
 
+    
     def generate_response(self, prompt):
-        
+        logger.info("Calls count", self.request_count)
         self.request_count += 1
         # Prevent hitting the 15 RPM limit on free tier
         if self.request_count % 10 == 0:

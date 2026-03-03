@@ -23,7 +23,7 @@ class llm:
         self.model_num = 1
         self.api_key_num = 1
         self.request_count = 0
-        self.available_api_keys_count = 16
+        self.available_api_keys_count = 17
         self.available_models_keys_count = 4
 
     def create_rag_collection(self, collection_name, docs):
@@ -105,8 +105,8 @@ Document:
         self.api_key_num += 1
         if self.api_key_num > self.available_api_keys_count:
             self.api_key_num = 1
-        if self.api_key_num == self.available_api_keys_count - 5 and self.model_num == 1:
-            self.switch_model()
+        # if self.api_key_num == self.available_api_keys_count - 5 and self.model_num == 1:
+        #     self.switch_model()
         logger.warning(f"Switching to API key #{self.api_key_num}")
 
         self.client = genai.Client(

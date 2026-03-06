@@ -46,7 +46,6 @@ class rag:
 
         except Exception:
             logger.exception("Embedding failed. changing API key.")
-            self.change_api_key()
             return self.embed_texts(texts)
 
     def create_collections(self, collection_name, docs):
@@ -112,6 +111,18 @@ class rag:
     def get_docs_from_collection(self, collection_name):
         logger.debug(f"Getting documents from {collection_name}")
         return self.vectorDB.get_collection(collection_name).get()
+
+    def add_doc_to_collection(self, collection_name, docs, metadata=None):
+        collection = self.get_or_create_collection(collection_name)
+        logger.info(f"Adding document to {collection_name}")
+        if isinstance(docs, str):
+            docs = [docs]
+        collection.add(
+            ids=[str(uuid4()) for _ in docs],
+            documents=docs,
+            metadatas=metadata,
+            embeddings=self.embed_texts(docs)
+        )
 
     def update_docs_in_collection(
         self,

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
 
+
 router = APIRouter()
 
 @router.post("/create_collection")
@@ -46,6 +47,11 @@ class UpdateDocsModel(BaseModel):
     docs: List[DocumentUpdate]  
 
 
+class addDocsModel(BaseModel):
+    api_key : str = Field(alias="x-api-key")
+    docs : List[object]
+
+
 @router.post("/update_docs_in_collection")
 def update_docs_in_collection(body:UpdateDocsModel,llm = Depends(get_llm)):
     if not llm.collection_exists(body.api_key):
@@ -55,3 +61,15 @@ def update_docs_in_collection(body:UpdateDocsModel,llm = Depends(get_llm)):
         raise HTTPException(status_code=404, detail="Document not found")
     
     return llm.update_docs_in_collection(api_key,body.docs.doc_id,body.docs.document,body.docs.metadata)
+
+
+
+@router.post("/add_doc_to_collection")
+def add_doc_to_collection(body:addDocsModel,llm = Depends(get_llm)):
+    if not llm.collection_exists(body.api_key):
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    if not body.docs:
+        raise HTTPException(status_code=400, detail="No documents provided")
+
+    return llm.add_doc_to_collection(body.api_key,str(body.docs))

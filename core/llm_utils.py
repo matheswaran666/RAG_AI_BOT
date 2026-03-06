@@ -113,6 +113,10 @@ Document:
             api_key=os.getenv("GOOGLE_API_KEY" + str(self.api_key_num))
         )
     
+    
+
+
+
     def switch_model(self):
         logger.info("Switching model...")
         self.model_num += 1
@@ -205,3 +209,11 @@ Document:
         return self.rag.update_docs_in_collection(
             collection_name, ids, documents, metadatas, embeddings
         )
+
+    def add_doc_to_collection(self, collection_name, docs, metadata=None):
+        return self.rag.add_doc_to_collection(collection_name, docs, metadata)
+
+
+
+    def function_calling(self, prompt):
+        logger.info("Calling function...")
